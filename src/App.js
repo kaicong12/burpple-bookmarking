@@ -1,22 +1,23 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Home } from './Pages/Home';
-import { Login } from './Pages/Login';
-import { AuthProvider } from './context/AuthContext';
-import { useAuth } from './context/AuthContext';
+import { Box, Flex } from '@chakra-ui/react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { AuthProvider, useAuth} from './context/AuthContext';
+
+import { AppRoutes } from './routes';
+import { Sidebar } from './Components/Sidebar';
 
 function App() {
   const { currentUser } = useAuth();
-  console.log(currentUser, 'current')
 
   return (
     <AuthProvider>
       <Router>
-        <Routes>
-          { currentUser ? <Route path="/home" element={<Home />} />: (
-            <Route path="/login" element={<Login />} />
-          )}
-        </Routes>
+        <Flex>
+          {currentUser && <Sidebar />}
+          <Box flex={1}>
+            <AppRoutes />
+          </Box>
+        </Flex>
       </Router>
     </AuthProvider>
   );
