@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from "react"
 import { useDisclosure } from '@chakra-ui/react';
-import Fuse from 'fuse.js';
 import { 
     useRecoilState,
     useRecoilValueLoadable
@@ -17,6 +16,7 @@ import {
     regionFilterState,
     restaurantListState
 } from "./state";
+import { folderListState } from "../Folder/state";
 
 
 
@@ -28,11 +28,14 @@ export const useBookmarkList = () => {
         location: null,
     }
 
-    const [isLoading, setIsLoading] = useState(true)
+    const [isGlobalLoading, setIsGlobalLoading] = useState(false)
+    const [isLoadingRestaurants, setIsLoadingRestaurants] = useState(true)
+    const [isLoadingFolders, setIsLoadingFolders] = useState(true)
     const { isOpen: isRestaurantCardOpen, onOpen: onOpenRestaurantCard, onClose: onCloseRestaurantCard } = useDisclosure();
     const { isOpen: isAddModalOpen, onOpen: onAddModalOpen, onClose: onAddModalClose } = useDisclosure();
     const [newRestaurant, setNewRestaurant] = useState(defaultRestaurantData)
     const [restaurantList, setRestaurantList] = useState([])
+    const [folderList, setFolderList] = useState([])
     const [selectedRestaurant, setSelectedRestaurant] = useState(null);
     const [searchValue, setSearchValue] = useRecoilState(searchState);
     const [sortByValue, setSortByValue] = useRecoilState(sortByState);
@@ -43,7 +46,7 @@ export const useBookmarkList = () => {
     }, [setRegionFilters])
 
     const onSearchInputChange = useCallback((value) => {
-          setSearchValue(value || "");
+        setSearchValue(value || "");
     }, [setSearchValue]);
 
     const sortOptions = useMemo(() => {
@@ -64,17 +67,6 @@ export const useBookmarkList = () => {
         ]
     }, [])
 
-    const fuzzySearchRestaurants = useCallback((events, query) => {
-        const options = {
-            keys: ['title', 'description', 'region', 'location'],
-            includeScore: true,
-            threshold: 0.4,
-        };
-    
-        const fuse = new Fuse(events, options);
-        return fuse.search(query).map(result => result.item);
-    }, [])
-
     const fetchRestaurants = async () => {
         try {
             const restaurantData = await getBookmarkedRestaurants()
@@ -90,7 +82,8 @@ export const useBookmarkList = () => {
     };
 
     const handleAddRestaurant = async (newRestaurant) => {
-        setIsLoading(true);
+        setIsGlobalLoading(true)
+        setIsLoadingRestaurants(true);
 
         try {
             await uploadRestaurant(newRestaurant)
@@ -99,14 +92,16 @@ export const useBookmarkList = () => {
             console.log(err)
         } finally {
             setNewRestaurant(defaultRestaurantData)
-            setIsLoading(false)
+            setIsLoadingRestaurants(false)
+            setIsGlobalLoading(false)
         }
         
         onAddModalClose();
     };
 
     const handleDeleteRestaurant = async (restaurant) => {
-        setIsLoading(true)
+        setIsGlobalLoading(true)
+        setIsLoadingRestaurants(true)
 
         try {
             await deleteRestaurant(restaurant.id)
@@ -114,13 +109,15 @@ export const useBookmarkList = () => {
         } catch (err) {
             console.log(err, 'delete restaurant failed')
         } finally {
-            setIsLoading(false)
+            setIsLoadingRestaurants(false)
+            setIsGlobalLoading(false)
             onCloseRestaurantCard();
         }
     };
 
     const handleUpdateRestaurant = async (restaurant) => {
-        setIsLoading(true)
+        setIsGlobalLoading(true)
+        setIsLoadingRestaurants(true)
 
         try {
             await updateRestaurant(restaurant)
@@ -128,6 +125,8 @@ export const useBookmarkList = () => {
         } catch (err) {
             console.log(err, 'error updating restaurant')
         } finally {
+            setIsLoadingRestaurants(true)
+            setIsGlobalLoading(false)
             handleCardClick(restaurant)
         }
     }
@@ -135,15 +134,29 @@ export const useBookmarkList = () => {
     const restaurantListLoadable = useRecoilValueLoadable(restaurantListState);
     useEffect(() => {
         if (restaurantListLoadable.state === "loading") {
-            setIsLoading(true);
+            setIsLoadingRestaurants(true);
         } else if (restaurantListLoadable.state === "hasValue") {
             setRestaurantList(restaurantListLoadable.contents)
-            setIsLoading(false);
+            setIsLoadingRestaurants(false);
         } else if (restaurantListLoadable.state === "hasError") {
             setRestaurantList([]);
-            setIsLoading(false);
+            setIsLoadingRestaurants(false);
         }
-    }, [restaurantListLoadable, setIsLoading]);
+    }, [restaurantListLoadable, setIsLoadingRestaurants]);
+
+    const folderListLoadable = useRecoilValueLoadable(folderListState);
+    useEffect(() => {
+        if (folderListLoadable.state === "loading") {
+            setIsLoadingFolders(true);
+        } else if (folderListLoadable.state === "hasValue") {
+            setFolderList(folderListLoadable.contents)
+            setIsLoadingFolders(false);
+        } else if (folderListLoadable.state === "hasError") {
+            setRestaurantList([]);
+            setIsLoadingFolders(false);
+        }
+    }, [folderListLoadable, setIsLoadingRestaurants]);
+    
 
     return {
         searchValue,
@@ -151,22 +164,26 @@ export const useBookmarkList = () => {
         regionFilters,
         onRegionFilterChange,
         regionLists,
-        isLoading,
+        isGlobalLoading,
+        isLoadingRestaurants,
+        isLoadingFolders,
         newRestaurant,
         setNewRestaurant,
         isAddModalOpen,
         onAddModalOpen,
         onAddModalClose,
         isRestaurantCardOpen,
+        onCloseRestaurantCard,
         restaurantList,
+        folderList,
         selectedRestaurant,
         sortOptions,
-        fuzzySearchRestaurants,
         handleAddRestaurant,
         handleDeleteRestaurant,
         handleUpdateRestaurant,
         onSearchInputChange,
         setSortByValue,
-        setRegionFilters
+        setRegionFilters,
+        handleCardClick
     }
 }

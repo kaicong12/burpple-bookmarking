@@ -1,5 +1,6 @@
 import {
     Box,
+    Flex,
     Image,
     Modal, 
     Button,
@@ -13,9 +14,10 @@ import {
     FormLabel,
     Input,
     Select,
-    FormErrorMessage
+    FormErrorMessage,
+    IconButton
 } from '@chakra-ui/react';
-
+import { CloseIcon } from '@chakra-ui/icons';
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 
@@ -28,6 +30,10 @@ export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        if (value && errors[name]) {
+            errors[name] = ""
+        }
+
         setNewRestaurant(prev => ({
             ...prev,
             [name]: value
@@ -51,9 +57,11 @@ export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen
             location: null,
         })
         setPreviewImage([])
+        setErrors({})
     }
 
     const {getRootProps, getInputProps, isDragActive} = useDropzone({
+        maxFiles: 1,
         accept: {
             'image/*': []
         },
@@ -68,21 +76,29 @@ export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen
         }
     });
 
+    const removeImage = () => {
+        setPreviewImage([]);
+        setNewRestaurant(prev => ({
+            ...prev,
+            thumbnail: null
+        }));
+    };
+
     const handleSave = useCallback((newRestaurant) => {
-        console.log(newRestaurant)
         const newErrors = {};
         if (!newRestaurant.title || !newRestaurant.title.length) {
             newErrors.title = 'Title is required'
         }
         if (!newRestaurant.thumbnail) {
-            newErrors.file = 'Thumbnail is required';
+            newErrors.thumbnail = 'Thumbnail is required';
         }
         if (!newRestaurant.region) {
-            newErrors.category = 'Category is required';
+            newErrors.region = 'Region is required';
         }
         if (!newRestaurant.location || !newRestaurant.location.length) {
             newErrors.location = 'Location is required'
         }
+
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
@@ -91,29 +107,40 @@ export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen
     }, [handleAddRestaurant])
 
     return (
-        <Modal isOpen={isAddModalOpen} onClose={handleOnClose}>
+        <Modal isOpen={isAddModalOpen} onClose={handleOnClose} size="3xl">
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>Add New Bookmark</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                    <FormControl mb={4} isInvalid={errors.file}>
+                    <FormControl mb={4} isInvalid={errors.thumbnail}>
                         { previewImage.length ? (
                             <Box display="flex" justifyContent="center"> {previewImage.map((image, imageIdx) => (
-                                <Image 
-                                    key={imageIdx} 
-                                    src={image.preview || 'https://via.placeholder.com/150'} 
-                                    alt="Uploaded thumbnail" 
-                                    fit="cover"
-                                    width="300px"
-                                    height="300px"
-                                />
-                            ))} </Box>
+                                    <Box key={imageIdx} position="relative">
+                                        <Image 
+                                            key={imageIdx} 
+                                            src={image.preview || 'https://via.placeholder.com/150'} 
+                                            alt="Uploaded thumbnail" 
+                                            fit="cover"
+                                            width="200px"
+                                            height="200px"
+                                        />
+                                        <IconButton
+                                            borderRadius="100%"
+                                            icon={<CloseIcon width="10px" height="10px" />}
+                                            position="absolute"
+                                            top="-20px"
+                                            right="-20px"
+                                            onClick={removeImage}
+                                        />
+                                    </Box>
+                                ))} 
+                            </Box>
                         ) : (
                             <div {...getRootProps()} style={{ 
                                     borderWidth: '2px',
-                                    borderColor: errors.file ? '#E53E3E' : 'inherit',
-                                    boxShadow: errors.file ? '0 0 0 1px #E53E3E' : 'inherit',
+                                    borderColor: errors.thumbnail ? '#E53E3E' : 'inherit',
+                                    boxShadow: errors.thumbnail ? '0 0 0 1px #E53E3E' : 'inherit',
                                     padding: '20px', 
                                     textAlign: 'center',
                                     display: 'flex',
@@ -128,9 +155,9 @@ export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen
                                 }
                             </div>
                         ) }
-                        { errors.thumbnail && <FormErrorMessage>{errors.file}</FormErrorMessage> }
+                        { errors.thumbnail && <FormErrorMessage>{errors.thumbnail}</FormErrorMessage> }
                     </FormControl>
-                    <FormControl isInvalid={errors.title}>
+                    <FormControl isInvalid={errors.title} isRequired>
                         <FormLabel>Title</FormLabel>
                         <Input name="title" value={newRestaurant.title} onChange={handleInputChange} />
                         { errors.title && <FormErrorMessage>{errors.title}</FormErrorMessage> }
@@ -139,15 +166,24 @@ export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen
                         <FormLabel>Description</FormLabel>
                         <Input name="description" value={newRestaurant.description} onChange={handleInputChange} />
                     </FormControl>
-                    <FormControl mt={4} isInvalid={errors.category}>
-                        <FormLabel>Category</FormLabel>
-                        <Select name="region" value={newRestaurant.region} onChange={handleInputChange}>
-                            <option value="">Select a Region</option>
-                            { regionLists.map(label => <option key={label} value={label}>{label}</option>) }
-                        </Select>
-                        { errors.region && <FormErrorMessage>{errors.category}</FormErrorMessage> }
-                    </FormControl>
-                    <FormControl flex="1" mt={4} isInvalid={errors.location}>
+                    <Flex gap="20px">
+                        <FormControl mt={4} isInvalid={errors.region} isRequired>
+                            <FormLabel>Region</FormLabel>
+                            <Select name="region" value={newRestaurant.region} onChange={handleInputChange}>
+                                <option value="">Select a Region</option>
+                                { regionLists.map(label => <option key={label} value={label}>{label}</option>) }
+                            </Select>
+                            { errors.region && <FormErrorMessage>{errors.region}</FormErrorMessage> }
+                        </FormControl>
+                        <FormControl mt={4} isInvalid={errors.folder}>
+                            <FormLabel>Folder</FormLabel>
+                            <Select name="folder" value={newRestaurant.folder} onChange={handleInputChange}>
+                                <option value="">Select a Folder</option>
+                                { regionLists.map(label => <option key={label} value={label}>{label}</option>) }
+                            </Select>
+                        </FormControl>
+                    </Flex>
+                    <FormControl flex="1" mt={4} isInvalid={errors.location} isRequired>
                         <FormLabel>Where is this</FormLabel>
                         <LocationSearchBox onSelectLocation={handleLocationChange} />
                         { errors.location && <FormErrorMessage>{errors.location}</FormErrorMessage> }

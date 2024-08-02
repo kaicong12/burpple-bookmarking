@@ -1,7 +1,9 @@
-import { Box, VStack, Text, Image, Heading } from '@chakra-ui/react';
+import { Box, VStack, Text, Image, HStack } from '@chakra-ui/react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMapMarkerAlt, faFolder } from '@fortawesome/free-solid-svg-icons';
 
-export const RestaurantCard = ({ restaurant }) => {
-    const { description, location, region, title, thumbnail } = restaurant
+export const RestaurantCard = ({ restaurant, onOpen }) => {
+    const { region, folder, title, thumbnail } = restaurant
     return (
         <Box 
             maxW="sm" 
@@ -9,18 +11,26 @@ export const RestaurantCard = ({ restaurant }) => {
             borderRadius="lg" 
             overflow="hidden"
             boxShadow="md"
+            onClick={onOpen} 
             width="182px"
         >
             <Image 
                 src={thumbnail} 
                 alt="Restaurant thumbnail" 
                 width="100%"
+                height="200px"
+                fit="cover"
             />
-            <VStack align="stretch" p={4} spacing={2}>
-                <Heading size="md">{ title }</Heading>
-                <Text fontWeight="bold">770 Reviews</Text>
-                <Text color="gray.500">North Bridge Road</Text>
-                <Text color="gray.500">Cafes & Coffees</Text>
+            <VStack align="stretch" p={2}>
+                <Text fontWeight="bold">{ title }</Text>
+                <HStack>
+                    <FontAwesomeIcon icon={faMapMarkerAlt} color="gray.500" />
+                    <Text isTruncated color="gray.500">{ region }</Text>
+                </HStack>
+                <HStack>
+                    <FontAwesomeIcon icon={faFolder} color="gray.500" />
+                    <Text isTruncated color="gray.500">{ folder }</Text>
+                </HStack>
             </VStack>
         </Box>
     );
