@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Box,
   Button,
@@ -10,6 +9,12 @@ import {
   Flex,
   Container,
   Heading,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItemOption,
+  MenuOptionGroup,
+  MenuDivider
 } from '@chakra-ui/react';
 import { AddIcon } from '@chakra-ui/icons'
 
@@ -20,6 +25,11 @@ import { useBookmarkList } from './useBookmarkList';
 
 export const Home = () => {
     const { 
+        searchValue,
+        sortByValue,
+        setSortByValue,
+        regionFilters,
+        onRegionFilterChange,
         regionLists,
         newRestaurant,
         setNewRestaurant,
@@ -28,25 +38,9 @@ export const Home = () => {
         handleCardClick, 
         isAddModalOpen,
         onAddModalOpen,
-        onAddModalClose
+        onAddModalClose,
+        onSearchInputChange
     } = useBookmarkList()
-
-    const [searchTerm, setSearchTerm] = useState('');
-    const [locationFilter, setLocationFilter] = useState('');
-
-    const handleSearch = (event) => {
-        setSearchTerm(event.target.value.toLowerCase());
-    };
-
-    const handleLocationFilter = (event) => {
-        setLocationFilter(event.target.value);
-    };
-
-    const filteredBookmarks = restaurantList.filter(bookmark => 
-        (bookmark?.title?.toLowerCase().includes(searchTerm) || 
-        bookmark?.description?.toLowerCase().includes(searchTerm)) &&
-        (locationFilter === '' || bookmark?.region === locationFilter)
-    );
   
     return (
         <Container maxW="container.xl" py={8}>
@@ -56,20 +50,19 @@ export const Home = () => {
                 <HStack spacing={4}>
                     <Input
                         placeholder="Search restaurants..."
-                        value={searchTerm}
-                        onChange={handleSearch}
+                        value={searchValue}
+                        onChange={onSearchInputChange}
                     />
-                    <Select
-                        placeholder="Filter by location"
-                        value={locationFilter}
-                        onChange={handleLocationFilter}
-                    >
-                        <option value="Central, Singapore">Central, Singapore</option>
-                        <option value="North, Singapore">North, Singapore</option>
-                        <option value="East, Singapore">East, Singapore</option>
-                        <option value="West, Singapore">West, Singapore</option>
-                        <option value="NorthEast, Singapore">NorthEast, Singapore</option>
-                    </Select>
+                    <Menu closeOnSelect={false}>
+                        <MenuButton as={Button} colorScheme='blue'>
+                            MenuItem
+                        </MenuButton>
+                        <MenuList minWidth='240px'>
+                            <MenuOptionGroup onChange={onRegionFilterChange} title='Region' type='checkbox'>
+                                { regionLists.map(region => <MenuItemOption key={`region-${region}`} value={region}>{ region }</MenuItemOption>) }
+                            </MenuOptionGroup>
+                        </MenuList>
+                    </Menu>
                     <Button 
                         onClick={onAddModalOpen} 
                         bg="brown.200" 
@@ -80,11 +73,11 @@ export const Home = () => {
                     </Button>
                 </HStack>
 
-                {filteredBookmarks.length === 0 ? (
+                {restaurantList.length === 0 ? (
                     <Text>No bookmarks found matching your criteria.</Text>
                 ) : (
                     <Flex>
-                        {filteredBookmarks.map(restaurant => (
+                        {restaurantList.map(restaurant => (
                             <Box key={restaurant.id}>
                                 <RestaurantCard restaurant={restaurant} />
                             </Box>

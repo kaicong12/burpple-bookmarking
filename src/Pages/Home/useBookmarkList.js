@@ -1,13 +1,22 @@
 import { useState, useMemo, useCallback, useEffect } from "react"
 import { useDisclosure } from '@chakra-ui/react';
 import Fuse from 'fuse.js';
-
+import { 
+    useRecoilState,
+    useRecoilValueLoadable
+} from "recoil";
 import { 
     getBookmarkedRestaurants,
     uploadRestaurant,
     deleteRestaurant,
     updateRestaurant
 } from "../../db";
+import { 
+    searchState,
+    sortByState,
+    regionFilterState,
+    restaurantListState
+} from "./state";
 
 
 
@@ -25,6 +34,17 @@ export const useBookmarkList = () => {
     const [newRestaurant, setNewRestaurant] = useState(defaultRestaurantData)
     const [restaurantList, setRestaurantList] = useState([])
     const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+    const [searchValue, setSearchValue] = useRecoilState(searchState);
+    const [sortByValue, setSortByValue] = useRecoilState(sortByState);
+    const [regionFilters, setRegionFilters] = useRecoilState(regionFilterState)
+
+    const onRegionFilterChange = useCallback((values) => {
+        setRegionFilters(values)
+    }, [setRegionFilters])
+
+    const onSearchInputChange = useCallback((value) => {
+          setSearchValue(value || "");
+    }, [setSearchValue]);
 
     const sortOptions = useMemo(() => {
         return [
@@ -56,15 +76,11 @@ export const useBookmarkList = () => {
     }, [])
 
     const fetchRestaurants = async () => {
-        setIsLoading(true)
-        
         try {
-            const eventData = await getBookmarkedRestaurants()
-            setRestaurantList(eventData)
+            const restaurantData = await getBookmarkedRestaurants()
+            setRestaurantList(restaurantData)
         } catch (error) {
             console.error('Error fetching events:', error);
-        } finally {
-            setIsLoading(false);
         }
     }
 
@@ -116,11 +132,24 @@ export const useBookmarkList = () => {
         }
     }
 
+    const restaurantListLoadable = useRecoilValueLoadable(restaurantListState);
     useEffect(() => {
-        fetchRestaurants()
-    }, [])
+        if (restaurantListLoadable.state === "loading") {
+            setIsLoading(true);
+        } else if (restaurantListLoadable.state === "hasValue") {
+            setRestaurantList(restaurantListLoadable.contents)
+            setIsLoading(false);
+        } else if (restaurantListLoadable.state === "hasError") {
+            setRestaurantList([]);
+            setIsLoading(false);
+        }
+    }, [restaurantListLoadable, setIsLoading]);
 
     return {
+        searchValue,
+        sortByValue,
+        regionFilters,
+        onRegionFilterChange,
         regionLists,
         isLoading,
         newRestaurant,
@@ -135,6 +164,9 @@ export const useBookmarkList = () => {
         fuzzySearchRestaurants,
         handleAddRestaurant,
         handleDeleteRestaurant,
-        handleUpdateRestaurant
+        handleUpdateRestaurant,
+        onSearchInputChange,
+        setSortByValue,
+        setRegionFilters
     }
 }

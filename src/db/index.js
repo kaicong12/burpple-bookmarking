@@ -15,7 +15,7 @@ export const uploadRestaurant = async (newRestaurants) => {
     const colRef = collection(db, "bookmarkedRestaurants");
     const { thumbnail, ...eventData } = newRestaurants
 
-    const completeRestaurantData = { ...eventData }
+    const completeRestaurantData = { ...eventData, createdAt: Date.now() }
     const storage = getStorage();
 
     try {
