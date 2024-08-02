@@ -6,10 +6,9 @@ Welcome to the Restaurant Bookmarking App! This application allows users to easi
 
 ## Functional Requirements
 
-### User Registration and Authentication
-- **User Registration**: Users should be able to create an account using their email and a password.
-- **User Login**: Registered users should be able to log in using their email and password.
-- **Social Media Login**: Users should have the option to log in using their social media accounts (e.g., Facebook, Google).
+### User Authentication
+- **Social Media Login**: Users should have the option to log in using their social media accounts (e.g., Twitter, Google).
+- **Logout**: Users should be able to logout securely
 
 ### Restaurant Bookmarking
 - **Add Bookmark**: Users should be able to bookmark a restaurant by entering details such as name, address, and cuisine.
@@ -17,25 +16,17 @@ Welcome to the Restaurant Bookmarking App! This application allows users to easi
 - **Delete Bookmark**: Users should be able to remove a restaurant from their bookmarks.
 - **View Bookmarks**: Users should be able to view a list of all their bookmarked restaurants.
 
+### Folder
+- **Create Folder**: Users should be able to create a new folder and name it
+- **Add Restaurants To Folder**: Users should be able to organize their bookmarks into folders
+- **Edit Folder**: Users should be able to rename folders. 
+- **Deleting Folder**: Users should be able to delete folders. The app should ensure that deleting a folder does not delete the bookmarks within it.
+
+### Error Handling
+- **Error while logging in**: Users should be notified the reason as to why they are unable to sign in
+- **Error while adding bookmark**: Users should be notified why they are unable to save their bookmark
+
 ### Search and Filter
-- **Search Restaurants**: Users should be able to search for restaurants by name, address, or cuisine type.
-- **Filter Restaurants**: Users should be able to filter their bookmarked restaurants by different criteria such as rating, cuisine type, or location.
-
-## Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/restaurant-bookmarking-app.git
-   ```
-2. **Navigate to the project directory:**
-   ```bash
-   cd restaurant-bookmarking-app
-   ```
-3. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-4. **Start the application:**
-   ```bash
-   npm start
-   ```
+- **Search Restaurants**: Users should be able to search for restaurants by name, description, or cuisine type.
+- **Filter Restaurants**: Users should be able to filter their bookmarked restaurants by different criteria such as cuisine type or location.
+- **Empty State**: Users should be shown an empty state when no restaurants match the search criteria and be informed on how to fix their search query
