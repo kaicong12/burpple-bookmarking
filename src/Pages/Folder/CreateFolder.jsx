@@ -71,10 +71,10 @@ export const CreateFolderModal = ({ newFolder, setNewFolder, isAddModalOpen, onA
                     </FormControl>
                 </ModalBody>
                 <ModalFooter>
-                    <Button colorScheme="blue" mr={3} onClick={() => handleSave(newFolder)}>
+                    <Button bg="#ea246e" color="white" mr={3} onClick={() => handleSave(newFolder)}>
                         Save
                     </Button>
-                    <Button onClick={handleOnClose}>Cancel</Button>
+                    <Button variant="outline" onClick={handleOnClose}>Cancel</Button>
                 </ModalFooter>
             </ModalContent>
         </Modal>

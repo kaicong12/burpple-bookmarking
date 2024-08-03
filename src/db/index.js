@@ -1,6 +1,16 @@
 import { v4 as uuidv4 } from 'uuid';
 import { db } from "./firebase";
-import { doc, getDoc, deleteDoc, collection, getDocs, addDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { 
+    doc, 
+    getDoc, 
+    deleteDoc, 
+    collection, 
+    getDocs,
+    addDoc, 
+    updateDoc, 
+    arrayUnion, 
+    arrayRemove 
+} from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 
@@ -102,32 +112,31 @@ export const deleteRestaurant = async (restaurantId) => {
 }
 
 export const updateRestaurant = async (restaurant) => {
-    const { id: restaurantId, thumbnail, folder: folderIds, ...restaurantData } = restaurant
+    const { id: restaurantId, thumbnail, folders: newFolderIds, ...restaurantData } = restaurant
     const restaurantDocRef = doc(db, "bookmarkedRestaurants", restaurantId);
-    const storage = getStorage();
 
     try {
-        // If there's a new file to update the thumbnail
-        if (thumbnail) {
-            // Check if there's an existing thumbnail to delete
-            const docSnap = await getDoc(restaurantDocRef);
-            if (docSnap.exists() && docSnap.data().thumbnail) {
-                const oldThumbnailRef = ref(storage, docSnap.data().thumbnail);
-                await deleteObject(oldThumbnailRef);  // Delete the old thumbnail
-            }
-
-            // Upload the new file and update the thumbnail URL
-            const newFileRef = ref(storage, `bookmarkedRestaurants/${thumbnail.name}`);
-            const fileSnapshot = await uploadBytes(newFileRef, thumbnail);
-            const newThumbnailURL = await getDownloadURL(fileSnapshot.ref);
-            restaurantData.thumbnail = newThumbnailURL;  // Update thumbnail URL in event data
+        // Get the current document snapshot
+        const docSnap = await getDoc(restaurantDocRef);
+        if (!docSnap.exists()) {
+            throw new Error("Document does not exist!");
         }
+        
+        const currentData = docSnap.data();
+        const currentFolderIds = currentData.folders || [];
 
         // Update the event document with new data
-        await updateDoc(restaurantDocRef, { ...restaurantData, folder: folderIds });
-        if (folderIds) {
-            const updatePromises = folderIds.map(folderId => updateFolderWithRestaurantId(folderId, restaurantId));
-            await Promise.all(updatePromises);
+        await updateDoc(restaurantDocRef, { ...restaurantData, folders: newFolderIds });
+        if (newFolderIds) {
+            const removedFolders = currentFolderIds.filter(id => !newFolderIds.includes(id));
+
+            const updatePromises = newFolderIds.map(folderId => updateFolderWithRestaurantId(folderId, restaurantId));
+            const removePromises = removedFolders.map(folderId => {
+                const folderDocRef = doc(db, `folderList/${folderId}`);
+                return updateDoc(folderDocRef, { restaurants: arrayRemove(restaurantId) });
+            });
+            
+            await Promise.all([ ...updatePromises, ...removePromises ]);
         }
 
         return restaurantId;  // Return the event ID to confirm the update

@@ -20,11 +20,11 @@ import { AddIcon } from '@chakra-ui/icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEarthAmericas, faSort, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
-import { RestaurantModal } from '../../Components/RestaurantModal';
 import { EmptySearchState } from '../../Components/EmptyState';
 import { CreateBookmark } from './CreateBookmark'
 import { RestaurantCard } from "../../Components/RestaurantCard";
 import { useBookmarkList } from './useBookmarkList';
+import { useRestaurant } from '../../context/RestaurantContext';
 
 
 const FilterButton = forwardRef((props, ref) => {
@@ -49,19 +49,14 @@ export const Home = () => {
         regionLists,
         newRestaurant,
         setNewRestaurant,
-        selectedRestaurant,
         restaurantList, 
-        handleAddRestaurant, 
-        handleCardClick, 
+        handleAddRestaurant,
         isAddModalOpen,
-        isRestaurantCardOpen,
-        onCloseRestaurantCard,
-        handleUpdateRestaurant,
-        handleDeleteRestaurant,
         onAddModalOpen,
         onAddModalClose,
         onSearchInputChange
     } = useBookmarkList()
+    const { handleCardClick } = useRestaurant()
 
     const [searchTerm, setSearchTerm] = useState('')
     useEffect(() => {
@@ -123,8 +118,8 @@ export const Home = () => {
                                 <MenuButton
                                     as={FilterButton}
                                     buttontext={'Sort By'}
-                                    bg='#EAD9BF'
-                                    color='#8F611B'
+                                    bg="#ea246e" 
+                                    color="white"
                                     leftIcon={<FontAwesomeIcon icon={faSort} />}
                                 >
                                 </MenuButton>
@@ -148,8 +143,8 @@ export const Home = () => {
                                 <MenuButton
                                     as={FilterButton}
                                     buttontext={`Region ${regionFilters.length ? ` (${regionFilters.length})`: ''}`}
-                                    bg='#EAD9BF'
-                                    color='#8F611B'
+                                    bg="#ea246e" 
+                                    color="white"
                                     leftIcon={<FontAwesomeIcon icon={faEarthAmericas} />}
                                 >
                                     MenuItem
@@ -192,15 +187,6 @@ export const Home = () => {
                 regionLists={regionLists}
                 folderList={folderList}
             />
-            {selectedRestaurant && (
-                <RestaurantModal 
-                    handleDeleteRestaurant={handleDeleteRestaurant}
-                    handleUpdateRestaurant={handleUpdateRestaurant}
-                    restaurant={selectedRestaurant} 
-                    isOpen={isRestaurantCardOpen} 
-                    onClose={onCloseRestaurantCard}
-                />
-            )}
         </Box>
     );
 };
