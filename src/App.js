@@ -1,10 +1,10 @@
 import React from 'react';
-import { Box, Flex } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider, useAuth} from './context/AuthContext';
 
-import { AppRoutes } from './routes';
 import { Sidebar } from './Components/Sidebar';
+import { AppRoutes } from './routes'
 
 function App() {
   const { currentUser } = useAuth();
@@ -12,12 +12,10 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <Flex>
+        <Box w="100vw" borderWidth="0px">
           {currentUser && <Sidebar />}
-          <Box flex={1}>
-            <AppRoutes />
-          </Box>
-        </Flex>
+          <AppRoutes />
+        </Box>
       </Router>
     </AuthProvider>
   );
