@@ -3,6 +3,7 @@ import { AddIcon } from '@chakra-ui/icons'
 
 import { RestaurantCard } from '../../Components/RestaurantCard';
 import { CreateFolderModal } from './CreateFolder';
+import { useRestaurant } from '../../context/RestaurantContext';
 import { useFolderList } from "./useFolderList"
 
 
@@ -16,6 +17,10 @@ export const FolderPage = () => {
         setNewFolder,
         handleAddFolder
     } = useFolderList()
+
+    const {
+        handleCardClick 
+    } = useRestaurant()
 
     return (
         <Box padding="30px">
@@ -34,11 +39,17 @@ export const FolderPage = () => {
                 <Box key={folder.id} mb={8}>
                     <Text fontSize="xl" fontWeight="bold">{folder.name}</Text>
                     <Text fontSize="sm" color="gray.500">{folder.description}</Text>
-                    <Flex flexWrap="wrap" gap={4}>
-                        {folder.restaurants.map((restaurant) => (
-                            <RestaurantCard key={restaurant.id} restaurant={restaurant} />
-                        ))}
-                    </Flex>
+                    { folder.restaurants?.length ? (
+                        <Flex gap={4} mt="20px">
+                            {folder.restaurants.map((restaurant) => (
+                                <RestaurantCard key={restaurant.id} onOpen={() => handleCardClick(restaurant)} restaurant={restaurant} />
+                            ))}
+                        </Flex>
+                    ) : (
+                        <Box minH="100px" display="flex" justifyContent="center" alignItems="center">
+                            There is no restaurant under this folder yet.
+                        </Box>
+                    )}
                 </Box>
             ))}
 

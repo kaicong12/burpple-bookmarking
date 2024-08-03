@@ -17,6 +17,7 @@ import {
     restaurantListState
 } from "./state";
 import { folderListState } from "../Folder/state";
+import { useRestaurant } from "../../context/RestaurantContext"
 
 
 export const useBookmarkList = () => {
@@ -28,14 +29,13 @@ export const useBookmarkList = () => {
         folders: null
     }
 
+    const { handleCardClick, onCloseRestaurantCard } = useRestaurant()
     const [isGlobalLoading, setIsGlobalLoading] = useState(false)
     const [isLoadingRestaurants, setIsLoadingRestaurants] = useState(true)
-    const { isOpen: isRestaurantCardOpen, onOpen: onOpenRestaurantCard, onClose: onCloseRestaurantCard } = useDisclosure();
     const { isOpen: isAddModalOpen, onOpen: onAddModalOpen, onClose: onAddModalClose } = useDisclosure();
     const [newRestaurant, setNewRestaurant] = useState(defaultRestaurantData)
     const [restaurantList, setRestaurantList] = useState([])
     const [folderList, setFolderList] = useState([])
-    const [selectedRestaurant, setSelectedRestaurant] = useState(null);
     const [searchValue, setSearchValue] = useRecoilState(searchState);
     const [sortByValue, setSortByValue] = useRecoilState(sortByState);
     const [regionFilters, setRegionFilters] = useRecoilState(regionFilterState)
@@ -73,11 +73,6 @@ export const useBookmarkList = () => {
         onSyncRestaurants()
         onSyncFolders()
     }, [onSyncRestaurants, onSyncFolders])
-
-    const handleCardClick = (restaurant) => {
-        setSelectedRestaurant(restaurant);
-        onOpenRestaurantCard();
-    };
 
     const handleAddRestaurant = async (newRestaurant) => {
         setIsGlobalLoading(true)
@@ -166,10 +161,7 @@ export const useBookmarkList = () => {
         isAddModalOpen,
         onAddModalOpen,
         onAddModalClose,
-        isRestaurantCardOpen,
-        onCloseRestaurantCard,
         restaurantList,
-        selectedRestaurant,
         sortOptions,
         handleAddRestaurant,
         handleDeleteRestaurant,
@@ -177,6 +169,5 @@ export const useBookmarkList = () => {
         onSearchInputChange,
         setSortByValue,
         setRegionFilters,
-        handleCardClick
     }
 }

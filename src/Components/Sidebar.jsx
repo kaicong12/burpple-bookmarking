@@ -27,6 +27,9 @@ import {
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useRestaurant } from '../context/RestaurantContext';
+import { useBookmarkList } from '../Pages/Home/useBookmarkList'
+import { RestaurantModal } from './RestaurantModal'
 
 
 export const Sidebar = () => {
@@ -52,6 +55,19 @@ export const Sidebar = () => {
         navigate(path);
         onClose();
     };
+
+    const {
+        isRestaurantCardOpen, 
+        onCloseRestaurantCard, 
+        selectedRestaurant
+    } = useRestaurant()
+
+    const {
+        regionLists,
+        folderList,
+        handleUpdateRestaurant,
+        handleDeleteRestaurant,
+    } = useBookmarkList()
 
     return (
         <Box bg="white">
@@ -130,6 +146,18 @@ export const Sidebar = () => {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
+
+            {selectedRestaurant && (
+                <RestaurantModal 
+                    handleDeleteRestaurant={handleDeleteRestaurant}
+                    handleUpdateRestaurant={handleUpdateRestaurant}
+                    restaurant={selectedRestaurant} 
+                    isOpen={isRestaurantCardOpen} 
+                    onClose={onCloseRestaurantCard}
+                    folderList={folderList}
+                    regionLists={regionLists}
+                />
+            )}
         </Box>
     );
 }
