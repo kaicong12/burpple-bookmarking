@@ -13,18 +13,18 @@ import {
     FormControl,
     FormLabel,
     Input,
-    Select,
     FormErrorMessage,
     IconButton
 } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import Select from 'react-select';
 
 import { LocationSearchBox } from '../../Components/LocationSearchBox';
 
 
-export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen, onAddModalClose, handleAddRestaurant, regionLists }) => {
+export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen, onAddModalClose, handleAddRestaurant, regionLists, folderList }) => {
     const [previewImage, setPreviewImage] = useState([])
     const [errors, setErrors] = useState({});
 
@@ -47,6 +47,26 @@ export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen
             location: locationText,
         }));
     }
+
+    const handleRegionChange = (selectedOption) => {
+        const hasValue = selectedOption && selectedOption.value
+        if (hasValue && errors.region) {
+            errors["region"] = ""
+        }
+
+        setNewRestaurant(prev => ({
+            ...prev,
+            region: selectedOption ? selectedOption.value : null
+        }));
+    }
+
+    const handleFolderChange = (selectedOptions) => {
+        const selectedFolderIds = selectedOptions ? selectedOptions.map(option => option.value) : [];
+        setNewRestaurant(prev => ({
+            ...prev,
+            folders: selectedFolderIds
+        }));
+    };
 
     const handleOnClose = () => {
         onAddModalClose()
@@ -105,6 +125,16 @@ export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen
         }
         handleAddRestaurant(newRestaurant);
     }, [handleAddRestaurant])
+
+    const folderOptions = folderList.map(folder => ({
+        value: folder.id,
+        label: folder.name
+    }));
+
+    const regionOptions = regionLists.map(region => ({
+        value: region,
+        label: region,
+    }));
 
     return (
         <Modal isOpen={isAddModalOpen} onClose={handleOnClose} size="3xl">
@@ -169,18 +199,35 @@ export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen
                     <Flex gap="20px">
                         <FormControl mt={4} isInvalid={errors.region} isRequired>
                             <FormLabel>Region</FormLabel>
-                            <Select name="region" value={newRestaurant.region} onChange={handleInputChange}>
-                                <option value="">Select a Region</option>
-                                { regionLists.map(label => <option key={label} value={label}>{label}</option>) }
-                            </Select>
+                            <Select
+                                name="region"
+                                placeholder="Select a Region..."
+                                options={regionOptions}
+                                onChange={handleRegionChange}
+                                styles={{
+                                    control: (provided, state) => ({
+                                        ...provided,
+                                        borderColor: errors.region ? '#E53E3E' : provided.borderColor,
+                                        '&:hover': {
+                                            borderColor: errors.region ? '#E53E3E' : provided.borderColor
+                                        },
+                                        boxShadow: errors.region ? '0 0 0 1px #E53E3E' : state.isFocused ? '0 0 0 1px #3182ce' : provided.boxShadow,
+                                    })
+                                }}
+                            />
                             { errors.region && <FormErrorMessage>{errors.region}</FormErrorMessage> }
                         </FormControl>
-                        <FormControl mt={4} isInvalid={errors.folder}>
+                        <FormControl mt={4}>
                             <FormLabel>Folder</FormLabel>
-                            <Select name="folder" value={newRestaurant.folder} onChange={handleInputChange}>
-                                <option value="">Select a Folder</option>
-                                { regionLists.map(label => <option key={label} value={label}>{label}</option>) }
-                            </Select>
+                            <Select
+                                name="folders"
+                                placeholder="Select folders..."
+                                options={folderOptions}
+                                onChange={handleFolderChange}
+                                closeMenuOnSelect={false}
+                                isMulti
+                                isClearable
+                            />
                         </FormControl>
                     </Flex>
                     <FormControl flex="1" mt={4} isInvalid={errors.location} isRequired>

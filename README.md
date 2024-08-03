@@ -30,3 +30,17 @@ Welcome to the Restaurant Bookmarking App! This application allows users to easi
 - **Search Restaurants**: Users should be able to search for restaurants by name, description, or cuisine type.
 - **Filter Restaurants**: Users should be able to filter their bookmarked restaurants by different criteria such as cuisine type or location.
 - **Empty State**: Users should be shown an empty state when no restaurants match the search criteria and be informed on how to fix their search query
+
+
+## Non-Functional Requirements
+
+### Performance
+- **Fast Loading Times**: The application should load quickly, with a target load time of under 3 seconds for the main user interface.
+
+### Scalability
+- **Handle User Growth**: The backend should be able to scale to accommodate a growing number of users and increasing amounts of data.
+- **Serverless Architecture**: Utilizing Firebase's serverless capabilities to automatically handle scaling without manual intervention.
+
+### Security
+- **Secure Authentication**: Use OAuth for secure social media logins and ensure secure token handling.
+- **Access Control**: Implement proper access control to ensure that users can only access their own data.

@@ -2,10 +2,10 @@ import { useState, useMemo, useCallback, useEffect } from "react"
 import { useDisclosure } from '@chakra-ui/react';
 import { 
     useRecoilState,
-    useRecoilValueLoadable
+    useRecoilValueLoadable,
+    useRecoilRefresher_UNSTABLE
 } from "recoil";
-import { 
-    getBookmarkedRestaurants,
+import {
     uploadRestaurant,
     deleteRestaurant,
     updateRestaurant
@@ -19,18 +19,17 @@ import {
 import { folderListState } from "../Folder/state";
 
 
-
 export const useBookmarkList = () => {
     const defaultRestaurantData = {
         title: '',
         description: '',
         region: null,
         location: null,
+        folders: null
     }
 
     const [isGlobalLoading, setIsGlobalLoading] = useState(false)
     const [isLoadingRestaurants, setIsLoadingRestaurants] = useState(true)
-    const [isLoadingFolders, setIsLoadingFolders] = useState(true)
     const { isOpen: isRestaurantCardOpen, onOpen: onOpenRestaurantCard, onClose: onCloseRestaurantCard } = useDisclosure();
     const { isOpen: isAddModalOpen, onOpen: onAddModalOpen, onClose: onAddModalClose } = useDisclosure();
     const [newRestaurant, setNewRestaurant] = useState(defaultRestaurantData)
@@ -40,6 +39,9 @@ export const useBookmarkList = () => {
     const [searchValue, setSearchValue] = useRecoilState(searchState);
     const [sortByValue, setSortByValue] = useRecoilState(sortByState);
     const [regionFilters, setRegionFilters] = useRecoilState(regionFilterState)
+
+  const onSyncRestaurants = useRecoilRefresher_UNSTABLE(restaurantListState);
+  const onSyncFolders = useRecoilRefresher_UNSTABLE(folderListState)
 
     const onRegionFilterChange = useCallback((values) => {
         setRegionFilters(values)
@@ -67,14 +69,10 @@ export const useBookmarkList = () => {
         ]
     }, [])
 
-    const fetchRestaurants = async () => {
-        try {
-            const restaurantData = await getBookmarkedRestaurants()
-            setRestaurantList(restaurantData)
-        } catch (error) {
-            console.error('Error fetching events:', error);
-        }
-    }
+    const onSync = useCallback(() => {
+        onSyncRestaurants()
+        onSyncFolders()
+    }, [onSyncRestaurants, onSyncFolders])
 
     const handleCardClick = (restaurant) => {
         setSelectedRestaurant(restaurant);
@@ -87,7 +85,7 @@ export const useBookmarkList = () => {
 
         try {
             await uploadRestaurant(newRestaurant)
-            await fetchRestaurants()
+            onSync()
         } catch (err) {
             console.log(err)
         } finally {
@@ -105,7 +103,7 @@ export const useBookmarkList = () => {
 
         try {
             await deleteRestaurant(restaurant.id)
-            await fetchRestaurants()
+            onSync()
         } catch (err) {
             console.log(err, 'delete restaurant failed')
         } finally {
@@ -121,7 +119,7 @@ export const useBookmarkList = () => {
 
         try {
             await updateRestaurant(restaurant)
-            await fetchRestaurants()
+            onSync()
         } catch (err) {
             console.log(err, 'error updating restaurant')
         } finally {
@@ -146,16 +144,12 @@ export const useBookmarkList = () => {
 
     const folderListLoadable = useRecoilValueLoadable(folderListState);
     useEffect(() => {
-        if (folderListLoadable.state === "loading") {
-            setIsLoadingFolders(true);
-        } else if (folderListLoadable.state === "hasValue") {
+        if (folderListLoadable.state === "hasValue") {
             setFolderList(folderListLoadable.contents)
-            setIsLoadingFolders(false);
         } else if (folderListLoadable.state === "hasError") {
-            setRestaurantList([]);
-            setIsLoadingFolders(false);
+            setFolderList([]);
         }
-    }, [folderListLoadable, setIsLoadingRestaurants]);
+    }, [folderListLoadable.contents, folderListLoadable.state]);
     
 
     return {
@@ -164,9 +158,9 @@ export const useBookmarkList = () => {
         regionFilters,
         onRegionFilterChange,
         regionLists,
+        folderList,
         isGlobalLoading,
         isLoadingRestaurants,
-        isLoadingFolders,
         newRestaurant,
         setNewRestaurant,
         isAddModalOpen,
@@ -175,7 +169,6 @@ export const useBookmarkList = () => {
         isRestaurantCardOpen,
         onCloseRestaurantCard,
         restaurantList,
-        folderList,
         selectedRestaurant,
         sortOptions,
         handleAddRestaurant,

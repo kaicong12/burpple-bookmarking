@@ -1,9 +1,9 @@
 import { Box, VStack, Text, Image, HStack } from '@chakra-ui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapMarkerAlt, faFolder } from '@fortawesome/free-solid-svg-icons';
+import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 
 export const RestaurantCard = ({ restaurant, onOpen }) => {
-    const { region, folder, title, thumbnail } = restaurant
+    const { region, title, thumbnail } = restaurant
     return (
         <Box 
             maxW="sm" 
@@ -24,12 +24,8 @@ export const RestaurantCard = ({ restaurant, onOpen }) => {
             <VStack align="stretch" p={2}>
                 <Text fontWeight="bold">{ title }</Text>
                 <HStack>
-                    <FontAwesomeIcon icon={faMapMarkerAlt} color="gray.500" />
+                    <FontAwesomeIcon icon={faMapMarkerAlt} color="#718096" />
                     <Text isTruncated color="gray.500">{ region }</Text>
-                </HStack>
-                <HStack>
-                    <FontAwesomeIcon icon={faFolder} color="gray.500" />
-                    <Text isTruncated color="gray.500">{ folder }</Text>
                 </HStack>
             </VStack>
         </Box>

@@ -26,7 +26,7 @@ import {
 } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
 export const Sidebar = () => {
@@ -36,7 +36,6 @@ export const Sidebar = () => {
         onOpen: onModalOpen,
         onClose: onModalClose,
     } = useDisclosure();
-    const location = useLocation();
     const navigate = useNavigate();
     const { currentUser, handleLogout: logout } = useAuth();
 
@@ -53,8 +52,6 @@ export const Sidebar = () => {
         navigate(path);
         onClose();
     };
-
-    const isActive = (path) => location.pathname === path;
 
     return (
         <Box bg="white">
@@ -93,10 +90,7 @@ export const Sidebar = () => {
 
             <Tabs align='center' variant='unstyled' mt="-5px">
                 <TabList padding="5px">
-                    <Tab 
-                        onClick={() => navigateTo('/home')} 
-                        isSelected={isActive('/home')}
-                    >
+                    <Tab onClick={() => navigateTo('/home')}>
                         <Text 
                             color="#555555" 
                             fontWeight="600" 
@@ -106,10 +100,7 @@ export const Sidebar = () => {
                             Bookmark
                         </Text>
                     </Tab>
-                    <Tab 
-                        onClick={() => navigateTo('/folder')} 
-                        isSelected={isActive('/folder')}
-                    >
+                    <Tab onClick={() => navigateTo('/folder')}>
                         <Text 
                             color="#555555" 
                             fontWeight="600" 

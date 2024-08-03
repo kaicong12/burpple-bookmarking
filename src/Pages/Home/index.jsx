@@ -40,9 +40,9 @@ export const Home = () => {
     const { 
         sortOptions,
         regionFilters,
+        folderList,
         isGlobalLoading,
         isLoadingRestaurants,
-        isLoadingFolders,
         sortByValue,
         setSortByValue,
         onRegionFilterChange,
@@ -64,8 +64,6 @@ export const Home = () => {
     } = useBookmarkList()
 
     const [searchTerm, setSearchTerm] = useState('')
-    const listPageLoading = isLoadingRestaurants || isLoadingFolders
-
     useEffect(() => {
         const timeout = setTimeout(() => {
             onSearchInputChange(searchTerm)
@@ -80,7 +78,7 @@ export const Home = () => {
         }
 
         return (
-            <Flex gap="20px">
+            <Flex gap="20px" mt="20px">
                 {restaurants.map(restaurant => (
                     <Box key={restaurant.id}>
                         <RestaurantCard onOpen={() => handleCardClick(restaurant)} restaurant={restaurant} />
@@ -114,7 +112,6 @@ export const Home = () => {
                             placeholder="E.g. western at Telok Ayer"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            leftIcon
                         />
                     </InputGroup>
                 </Flex>
@@ -176,7 +173,7 @@ export const Home = () => {
                         </Button>
                     </Flex>
                     
-                    {listPageLoading ? (
+                    {isLoadingRestaurants ? (
                         <Box minH="100vh" display="flex" justifyContent="center" alignItems="center">
                             <Spinner position="relative" top="-100px" size="xl" />
                         </Box>
@@ -193,6 +190,7 @@ export const Home = () => {
                 onAddModalClose={onAddModalClose}
                 handleAddRestaurant={handleAddRestaurant}
                 regionLists={regionLists}
+                folderList={folderList}
             />
             {selectedRestaurant && (
                 <RestaurantModal 

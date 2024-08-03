@@ -1,5 +1,5 @@
 import { atom, selector } from "recoil";
-import { getBookmarkedRestaurants } from "../../db";
+import { getAllFolders, getRestaurantById } from "../../db";
 
 
 export const searchState = atom({
@@ -13,13 +13,19 @@ export const sortByState = atom({
 })
 
 export const folderListState = selector({
-    key: "folderListState",
-    get: async ({ get }) => {
-        const search = get(searchState);
-        const orderBy = get(sortByState);
+    key: "folderList.folderListState",
+    get: async () => {
+        const allFolders = await getAllFolders()
+        const folderWithRestaurants = await Promise.all(allFolders.map(async (folder) => {
+            const { restaurants = [] } = folder;
+            const restaurantWithinFolders = await Promise.all(restaurants.map(async (restaurantId) => await getRestaurantById(restaurantId)))
 
-        const folderList = await getBookmarkedRestaurants()
+            return {
+                ...folder,
+                restaurants: restaurantWithinFolders
+            };
+        }))
 
-        return folderList;
+        return folderWithRestaurants;
     },
 });
