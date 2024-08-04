@@ -11,7 +11,7 @@ Welcome to the Restaurant Bookmarking App! This application allows users to easi
 - **Logout**: Users should be able to logout securely
 
 ### Restaurant Bookmarking
-- **Add Bookmark**: Users should be able to bookmark a restaurant by entering details such as name, address, and cuisine.
+- **Add Bookmark**: Users should be able to bookmark a restaurant by entering details such as name, address.
 - **Edit Bookmark**: Users should be able to edit the details of a bookmarked restaurant.
 - **Cancel Edit Confirmation**: Users should be notified if they want to discard his edit changes
 - **Delete Bookmark**: Users should be able to remove a restaurant from their bookmarks. Delete a bookmarked restaurant should remove it from the folders where this restaurant is in.
@@ -30,7 +30,7 @@ Welcome to the Restaurant Bookmarking App! This application allows users to easi
 
 ### Search and Filter
 - **Search Restaurants**: Users should be able to search for restaurants by name, description, or cuisine type.
-- **Filter Restaurants**: Users should be able to filter their bookmarked restaurants by different criteria such as cuisine type or location.
+- **Filter Restaurants**: Users should be able to filter their bookmarked restaurants by location.
 - **Restaurant Empty State**: Users should be shown an empty state when no restaurants match the search criteria and be informed on how to fix their search query
 - **Folder Empty State**: Users should be clearly notified when there is no restaurant under a folder
 
