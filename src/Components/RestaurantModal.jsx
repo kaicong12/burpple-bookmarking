@@ -32,6 +32,7 @@ import {
 
 import { useState, useMemo, useCallback } from 'react';
 import { LocationSearchBox } from './LocationSearchBox';
+import { ConfirmDiscardChangesModal } from './ConfirmDiscardChanges';
 import Select from 'react-select';
 
 export const RestaurantModal = ({ isLoading, handleDeleteRestaurant, handleUpdateRestaurant, restaurant, isOpen, onClose, folderList, regionLists }) => {
@@ -39,6 +40,9 @@ export const RestaurantModal = ({ isLoading, handleDeleteRestaurant, handleUpdat
     const [editMode, setEditMode] = useState(false);
     const [errors, setErrors] = useState({});
     const [editedRestaurant, setEditedRestaurant] = useState(restaurant);
+
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const [isDiscardModalOpen, setDiscardModalOpen] = useState(false);
 
     const handleEdit = () => {
         setEditedRestaurant(restaurant);
@@ -66,10 +70,14 @@ export const RestaurantModal = ({ isLoading, handleDeleteRestaurant, handleUpdat
         handleUpdateRestaurant(editedRestaurant);
     };
     
-    const handleCancelEdit = () => {
-        setEditMode(false);
-        setEditedRestaurant(restaurant);
-    };
+    const handleCancelEdit = useCallback(() => {
+        if (hasUnsavedChanges) {
+            setDiscardModalOpen(true);
+        } else {
+            setEditMode(false);
+            setEditedRestaurant(restaurant);
+        }
+    }, [hasUnsavedChanges, restaurant]);
 
     const handleDelete = () => {
         onDeleteOpen();
@@ -94,6 +102,8 @@ export const RestaurantModal = ({ isLoading, handleDeleteRestaurant, handleUpdat
             ...prev,
             [name]: value
         }));
+
+        setHasUnsavedChanges(true);
     };
 
     const handleLocationChange = (location) => {
@@ -106,6 +116,8 @@ export const RestaurantModal = ({ isLoading, handleDeleteRestaurant, handleUpdat
             ...prev,
             location: locationText,
         }));
+
+        setHasUnsavedChanges(true);
     }
 
     const handleFolderChange = (selectedOptions) => {
@@ -114,6 +126,8 @@ export const RestaurantModal = ({ isLoading, handleDeleteRestaurant, handleUpdat
             ...prev,
             folders: selectedFolderIds,
         }));
+
+        setHasUnsavedChanges(true);
     };
 
     const handleRegionChange = (selectedOption) => {
@@ -126,6 +140,8 @@ export const RestaurantModal = ({ isLoading, handleDeleteRestaurant, handleUpdat
             ...prev,
             region: selectedOption ? selectedOption.value : null
         }));
+
+        setHasUnsavedChanges(true);
     }
 
     const folderMap = useMemo(() => {
@@ -149,182 +165,196 @@ export const RestaurantModal = ({ isLoading, handleDeleteRestaurant, handleUpdat
     }));
 
     const handleCloseModal = useCallback(() => {
-        setEditedRestaurant(restaurant)
+        if (editMode) {
+            handleCancelEdit()
+        }
+    }, [editMode, handleCancelEdit])
+
+    const handleDiscardChanges = () => {
+        setDiscardModalOpen(false);
         setEditMode(false)
-        onClose()
-    }, [onClose, restaurant])
+        onClose();
+    };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleCloseModal} size="4xl" bg="#F2F2F2">
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader>
-                    <Text>Restaurant Details</Text>
-                </ModalHeader>
-                <Divider height="2px" />
+        <>
+            <Modal isOpen={isOpen} onClose={handleCloseModal} size="4xl" bg="#F2F2F2">
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>
+                        <Text>Restaurant Details</Text>
+                    </ModalHeader>
+                    <Divider height="2px" />
 
-                <ModalBody>
-                    <Flex>
-                        <Box flex="1" p="4" display="flex" alignItems="center">
-                            <Image 
-                                src={restaurant.thumbnail || 'https://via.placeholder.com/150'} 
-                                alt={`Thumbnail for ${restaurant.title}`} 
-                                fit="cover"
-                                width="100%"
-                                height="300px"
-                                borderRadius={"10px"}
-                            />
-                        </Box>
-                        <Flex flexDir="column" flex="2" p="4">
-                            <Box height="100%">
-                                {editMode ? (
-                                    <Box width="100%">
-                                        <FormControl isInvalid={errors.title} isRequired>
-                                            <FormLabel>Title</FormLabel>
-                                            <Input 
-                                                name="title" 
-                                                value={editedRestaurant.title} 
-                                                onChange={handleInputChange} 
-                                                placeholder="Edit your title here"
-                                                mb="8px"
-                                            />
-                                            { errors.title && <FormErrorMessage>{errors.title}</FormErrorMessage> }
-                                        </FormControl>
-
-                                        <FormControl>
-                                            <FormLabel>Description</FormLabel>
-                                            <Textarea
-                                                name="description"
-                                                value={editedRestaurant.description}
-                                                onChange={handleInputChange}
-                                                placeholder="Edit your description here"
-                                                mb="8px"
-                                            />
-                                        </FormControl>
-
-                                        <Flex gap="20px">
-                                            <FormControl mt={4} isInvalid={errors.region} isRequired>
-                                                <FormLabel>Region</FormLabel>
-                                                <Select
-                                                    name="region"
-                                                    placeholder="Select a Region..."
-                                                    value={{ value: editedRestaurant.region, label: editedRestaurant.region }}
-                                                    options={regionOptions}
-                                                    onChange={handleRegionChange}
-                                                    styles={{
-                                                        control: (provided, state) => ({
-                                                            ...provided,
-                                                            borderColor: errors.region ? '#E53E3E' : provided.borderColor,
-                                                            '&:hover': {
-                                                                borderColor: errors.region ? '#E53E3E' : provided.borderColor
-                                                            },
-                                                            boxShadow: errors.region ? '0 0 0 1px #E53E3E' : state.isFocused ? '0 0 0 1px #3182ce' : provided.boxShadow,
-                                                        })
-                                                    }}
-                                                />
-                                                { errors.region && <FormErrorMessage>{errors.region}</FormErrorMessage> }
-                                            </FormControl>
-                                            <FormControl mt={4}>
-                                                <FormLabel>Folder</FormLabel>
-                                                <Select
-                                                    name="folders"
-                                                    placeholder="Select folders..."
-                                                    value={editedRestaurant.folders?.map(folderId => ({ value: folderId, label: folderMap[folderId] }))}
-                                                    options={folderOptions}
-                                                    onChange={handleFolderChange}
-                                                    closeMenuOnSelect={false}
-                                                    isMulti
-                                                    isClearable
-                                                />
-                                            </FormControl>
-                                        </Flex>
-
-                                        <FormControl flex="1" mt={4} isInvalid={errors.location} isRequired>
-                                            <FormLabel>Where is this</FormLabel>
-                                            <LocationSearchBox currentLocation={restaurant.location} onSelectLocation={handleLocationChange} />
-                                            { errors.location && <FormErrorMessage>{errors.location}</FormErrorMessage> }
-                                        </FormControl>
-                                    </Box>
-                                ) : (
-                                    <Box height="100%" display="flex" flexDir="column" justifyContent="space-between">
-                                        <Text fontSize="20px" fontWeight="semibold" ml="8px" mb="8px">{restaurant.title}</Text>
-                                        <Text fontSize="16px" lineHeight="1.5rem" ml="8px" mb="8px">{restaurant.description || "This restaurant has no description"}</Text>
-                                        <Flex alignItems="center">
-                                            <FontAwesomeIcon icon={faGlobeAmericas} color="#ea246e" />
-                                            <Text fontSize="16px" lineHeight="1.5rem" ml="8px">{restaurant.region || "No region selected"}</Text>
-                                        </Flex>
-                                        <Flex alignItems="center">
-                                            <FontAwesomeIcon icon={faTags} color="#ea246e" />
-                                            <Text fontSize="16px" lineHeight="1.5rem" ml="8px">
-                                                {restaurant.folders?.map(folderId => folderList.find(folder => folder.id === folderId)?.name).join(', ') || "No folders selected"}
-                                            </Text>
-                                        </Flex>
-                                        <Flex alignItems="center" gap="8px">
-                                            <FontAwesomeIcon color="#ea246e" icon={faLocationDot} />
-                                            <Text maxW="90%" isTruncated color="#333333">{restaurant.location || "Unknown Location"}</Text>
-                                        </Flex>
-                                    </Box>
-                                )}
+                    <ModalBody>
+                        <Flex>
+                            <Box flex="1" p="4" display="flex" alignItems="center">
+                                <Image 
+                                    src={restaurant.thumbnail || 'https://via.placeholder.com/150'} 
+                                    alt={`Thumbnail for ${restaurant.title}`} 
+                                    fit="cover"
+                                    width="100%"
+                                    height="300px"
+                                    borderRadius={"10px"}
+                                />
                             </Box>
-                        </Flex>
-                    </Flex>
-                </ModalBody>
-                
-                <Divider height="2px" />
+                            <Flex flexDir="column" flex="2" p="4">
+                                <Box height="100%">
+                                    {editMode ? (
+                                        <Box width="100%">
+                                            <FormControl isInvalid={errors.title} isRequired>
+                                                <FormLabel>Title</FormLabel>
+                                                <Input 
+                                                    name="title" 
+                                                    value={editedRestaurant.title} 
+                                                    onChange={handleInputChange} 
+                                                    placeholder="Edit your title here"
+                                                    mb="8px"
+                                                />
+                                                { errors.title && <FormErrorMessage>{errors.title}</FormErrorMessage> }
+                                            </FormControl>
 
-                <ModalFooter>
-                    <ButtonGroup spacing="6" flex="1" justifyContent="space-between">
-                        <Button isLoading={isLoading} onClick={handleDelete} colorScheme="red" isDisabled={editMode}>
-                            <Flex gap="8px">
-                                <FontAwesomeIcon icon={faTrash} />
-                                Delete
+                                            <FormControl>
+                                                <FormLabel>Description</FormLabel>
+                                                <Textarea
+                                                    name="description"
+                                                    value={editedRestaurant.description}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Edit your description here"
+                                                    mb="8px"
+                                                />
+                                            </FormControl>
+
+                                            <Flex gap="20px">
+                                                <FormControl mt={4} isInvalid={errors.region} isRequired>
+                                                    <FormLabel>Region</FormLabel>
+                                                    <Select
+                                                        name="region"
+                                                        placeholder="Select a Region..."
+                                                        value={{ value: editedRestaurant.region, label: editedRestaurant.region }}
+                                                        options={regionOptions}
+                                                        onChange={handleRegionChange}
+                                                        styles={{
+                                                            control: (provided, state) => ({
+                                                                ...provided,
+                                                                borderColor: errors.region ? '#E53E3E' : provided.borderColor,
+                                                                '&:hover': {
+                                                                    borderColor: errors.region ? '#E53E3E' : provided.borderColor
+                                                                },
+                                                                boxShadow: errors.region ? '0 0 0 1px #E53E3E' : state.isFocused ? '0 0 0 1px #3182ce' : provided.boxShadow,
+                                                            })
+                                                        }}
+                                                    />
+                                                    { errors.region && <FormErrorMessage>{errors.region}</FormErrorMessage> }
+                                                </FormControl>
+                                                <FormControl mt={4}>
+                                                    <FormLabel>Folder</FormLabel>
+                                                    <Select
+                                                        name="folders"
+                                                        placeholder="Select folders..."
+                                                        value={editedRestaurant.folders?.map(folderId => ({ value: folderId, label: folderMap[folderId] }))}
+                                                        options={folderOptions}
+                                                        onChange={handleFolderChange}
+                                                        closeMenuOnSelect={false}
+                                                        isMulti
+                                                        isClearable
+                                                    />
+                                                </FormControl>
+                                            </Flex>
+
+                                            <FormControl flex="1" mt={4} isInvalid={errors.location} isRequired>
+                                                <FormLabel>Where is this</FormLabel>
+                                                <LocationSearchBox currentLocation={restaurant.location} onSelectLocation={handleLocationChange} />
+                                                { errors.location && <FormErrorMessage>{errors.location}</FormErrorMessage> }
+                                            </FormControl>
+                                        </Box>
+                                    ) : (
+                                        <Box height="100%" display="flex" flexDir="column" justifyContent="space-between">
+                                            <Text fontSize="20px" fontWeight="semibold" ml="8px" mb="8px">{restaurant.title}</Text>
+                                            <Text fontSize="16px" lineHeight="1.5rem" ml="8px" mb="8px">{restaurant.description || "This restaurant has no description"}</Text>
+                                            <Flex alignItems="center">
+                                                <FontAwesomeIcon icon={faGlobeAmericas} color="#ea246e" />
+                                                <Text fontSize="16px" lineHeight="1.5rem" ml="8px">{restaurant.region || "No region selected"}</Text>
+                                            </Flex>
+                                            <Flex alignItems="center">
+                                                <FontAwesomeIcon icon={faTags} color="#ea246e" />
+                                                <Text fontSize="16px" lineHeight="1.5rem" ml="8px">
+                                                    {restaurant.folders?.map(folderId => folderList.find(folder => folder.id === folderId)?.name).join(', ') || "No folders selected"}
+                                                </Text>
+                                            </Flex>
+                                            <Flex alignItems="center" gap="8px">
+                                                <FontAwesomeIcon color="#ea246e" icon={faLocationDot} />
+                                                <Text maxW="90%" isTruncated color="#333333">{restaurant.location || "Unknown Location"}</Text>
+                                            </Flex>
+                                        </Box>
+                                    )}
+                                </Box>
                             </Flex>
-                        </Button>
-                        {editMode ? (
-                            <ButtonGroup>
-                                <Button isLoading={isLoading} bg="#ea246e" color="white" onClick={handleSave} variant="solid">Save</Button>
-                                <Button isLoading={isLoading} onClick={handleCancelEdit} variant="outline">Cancel</Button>
-                            </ButtonGroup>
-                        ) : (
-                            <Button 
-                                bg="#ea246e" 
-                                color="white"
-                                onClick={handleEdit} 
-                                variant="solid"
-                                isLoading={isLoading}
-                            >
+                        </Flex>
+                    </ModalBody>
+                    
+                    <Divider height="2px" />
+
+                    <ModalFooter>
+                        <ButtonGroup spacing="6" flex="1" justifyContent="space-between">
+                            <Button isLoading={isLoading} onClick={handleDelete} colorScheme="red" isDisabled={editMode}>
                                 <Flex gap="8px">
-                                    <FontAwesomeIcon icon={faPenToSquare} />
-                                    Edit    
+                                    <FontAwesomeIcon icon={faTrash} />
+                                    Delete
                                 </Flex>
                             </Button>
-                        )}
-                    </ButtonGroup>
-                </ModalFooter>
+                            {editMode ? (
+                                <ButtonGroup>
+                                    <Button isLoading={isLoading} bg="#ea246e" color="white" onClick={handleSave} variant="solid">Save</Button>
+                                    <Button isLoading={isLoading} onClick={handleCancelEdit} variant="outline">Cancel</Button>
+                                </ButtonGroup>
+                            ) : (
+                                <Button 
+                                    bg="#ea246e" 
+                                    color="white"
+                                    onClick={handleEdit} 
+                                    variant="solid"
+                                    isLoading={isLoading}
+                                >
+                                    <Flex gap="8px">
+                                        <FontAwesomeIcon icon={faPenToSquare} />
+                                        Edit    
+                                    </Flex>
+                                </Button>
+                            )}
+                        </ButtonGroup>
+                    </ModalFooter>
 
-                {isDeleteOpen && (
-                    <Modal isOpen={isDeleteOpen} onClose={onDeleteClose} size="sm" bg="#F2F2F2" isCentered>
-                        <ModalOverlay />
-                        <ModalContent>
-                            <ModalHeader fontWeight="semibold">Delete Confirmation</ModalHeader>
-                            <ModalCloseButton />
-                            <Divider />
-                            <ModalBody>
-                                <Text>Are you sure you want to delete this restaurant?</Text>
-                            </ModalBody>
-                            <Divider />
-                            <ModalFooter>
-                                <Button mr="6px" variant="solid" colorScheme="red" onClick={handleConfirmDelete}>
-                                    Confirm
-                                </Button>
-                                <Button variant="outline" onClick={handleCancelDelete}>
-                                    Cancel
-                                </Button>
-                            </ModalFooter>
-                        </ModalContent>
-                    </Modal>
-                )}
-            </ModalContent>
-        </Modal>
+                    {isDeleteOpen && (
+                        <Modal isOpen={isDeleteOpen} onClose={onDeleteClose} size="sm" bg="#F2F2F2" isCentered>
+                            <ModalOverlay />
+                            <ModalContent>
+                                <ModalHeader fontWeight="semibold">Delete Confirmation</ModalHeader>
+                                <ModalCloseButton />
+                                <Divider />
+                                <ModalBody>
+                                    <Text>Are you sure you want to delete this restaurant?</Text>
+                                </ModalBody>
+                                <Divider />
+                                <ModalFooter>
+                                    <Button mr="6px" variant="solid" colorScheme="red" onClick={handleConfirmDelete}>
+                                        Confirm
+                                    </Button>
+                                    <Button variant="outline" onClick={handleCancelDelete}>
+                                        Cancel
+                                    </Button>
+                                </ModalFooter>
+                            </ModalContent>
+                        </Modal>
+                    )}
+                </ModalContent>
+            </Modal>
+
+            <ConfirmDiscardChangesModal
+                isOpen={isDiscardModalOpen}
+                onClose={() => setDiscardModalOpen(false)}
+                onConfirm={handleDiscardChanges}
+            />
+        </>
     );
 };
