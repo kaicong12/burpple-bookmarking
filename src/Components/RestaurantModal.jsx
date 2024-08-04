@@ -47,6 +47,7 @@ export const RestaurantModal = ({ isLoading, handleDeleteRestaurant, handleUpdat
     const handleEdit = () => {
         setEditedRestaurant(restaurant);
         setEditMode(true);
+        setHasUnsavedChanges(true)
     };
 
     const handleSave = () => {
