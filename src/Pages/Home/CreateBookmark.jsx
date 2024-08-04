@@ -17,14 +17,24 @@ import {
     IconButton
 } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Select from 'react-select';
 
 import { LocationSearchBox } from '../../Components/LocationSearchBox';
 
 
-export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen, onAddModalClose, handleAddRestaurant, regionLists, folderList }) => {
+export const CreateBookmark = ({ isLoading, isAddModalOpen, onAddModalClose, handleAddRestaurant, regionLists, folderList }) => {
+    const defaultRestaurantData = useMemo(() => ({
+        title: '',
+        description: '',
+        region: null,
+        location: null,
+        folders: null,
+        thumbnail: null,
+    }), [])
+
+    const [newRestaurant, setNewRestaurant] = useState(defaultRestaurantData)
     const [previewImage, setPreviewImage] = useState([])
     const [errors, setErrors] = useState({});
 
@@ -113,7 +123,7 @@ export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen
         }));
     };
 
-    const handleSave = useCallback((newRestaurant) => {
+    const handleSave = useCallback(async (newRestaurant) => {
         const newErrors = {};
         if (!newRestaurant.title || !newRestaurant.title.length) {
             newErrors.title = 'Title is required'
@@ -132,8 +142,13 @@ export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen
             setErrors(newErrors);
             return;
         }
-        handleAddRestaurant(newRestaurant);
-    }, [handleAddRestaurant])
+
+        await handleAddRestaurant(newRestaurant);
+
+        // reset the state
+        setPreviewImage([])
+        setNewRestaurant(defaultRestaurantData)
+    }, [defaultRestaurantData, handleAddRestaurant])
 
     const folderOptions = folderList.map(folder => ({
         value: folder.id,
@@ -246,10 +261,10 @@ export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen
                     </FormControl>
                 </ModalBody>
                 <ModalFooter>
-                    <Button colorScheme="blue" mr={3} onClick={() => handleSave(newRestaurant)}>
+                    <Button isLoading={isLoading} colorScheme="blue" mr={3} onClick={() => handleSave(newRestaurant)}>
                         Save
                     </Button>
-                    <Button onClick={handleOnClose}>Cancel</Button>
+                    <Button isLoading={isLoading} onClick={handleOnClose}>Cancel</Button>
                 </ModalFooter>
             </ModalContent>
         </Modal>

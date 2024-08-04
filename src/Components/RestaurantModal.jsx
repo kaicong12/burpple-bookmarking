@@ -34,7 +34,7 @@ import { useState, useMemo } from 'react';
 import { LocationSearchBox } from './LocationSearchBox';
 import Select from 'react-select';
 
-export const RestaurantModal = ({ handleDeleteRestaurant, handleUpdateRestaurant, restaurant, isOpen, onClose, folderList, regionLists }) => {
+export const RestaurantModal = ({ isLoading, handleDeleteRestaurant, handleUpdateRestaurant, restaurant, isOpen, onClose, folderList, regionLists }) => {
     const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
     const [editMode, setEditMode] = useState(false);
     const [errors, setErrors] = useState({});
@@ -268,7 +268,7 @@ export const RestaurantModal = ({ handleDeleteRestaurant, handleUpdateRestaurant
 
                 <ModalFooter>
                     <ButtonGroup spacing="6" flex="1" justifyContent="space-between">
-                        <Button onClick={handleDelete} colorScheme="red" isDisabled={editMode}>
+                        <Button isLoading={isLoading} onClick={handleDelete} colorScheme="red" isDisabled={editMode}>
                             <Flex gap="8px">
                                 <FontAwesomeIcon icon={faTrash} />
                                 Delete
@@ -276,8 +276,8 @@ export const RestaurantModal = ({ handleDeleteRestaurant, handleUpdateRestaurant
                         </Button>
                         {editMode ? (
                             <ButtonGroup>
-                                <Button bg="#ea246e" color="white" onClick={handleSave} variant="solid">Save</Button>
-                                <Button onClick={handleCancelEdit} variant="outline">Cancel</Button>
+                                <Button isLoading={isLoading} bg="#ea246e" color="white" onClick={handleSave} variant="solid">Save</Button>
+                                <Button isLoading={isLoading} onClick={handleCancelEdit} variant="outline">Cancel</Button>
                             </ButtonGroup>
                         ) : (
                             <Button 
@@ -285,6 +285,7 @@ export const RestaurantModal = ({ handleDeleteRestaurant, handleUpdateRestaurant
                                 color="white"
                                 onClick={handleEdit} 
                                 variant="solid"
+                                isLoading={isLoading}
                             >
                                 <Flex gap="8px">
                                     <FontAwesomeIcon icon={faPenToSquare} />

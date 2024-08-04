@@ -38,25 +38,26 @@ const FilterButton = forwardRef((props, ref) => {
 
 export const Home = () => {
     const { 
-        sortOptions,
-        regionFilters,
-        folderList,
-        isGlobalLoading,
-        isLoadingRestaurants,
         sortByValue,
-        setSortByValue,
+        regionFilters,
         onRegionFilterChange,
         regionLists,
-        newRestaurant,
-        setNewRestaurant,
-        restaurantList, 
-        handleAddRestaurant,
+        folderList,
+        isLoadingRestaurants,
+        restaurantList,
+        sortOptions,
+        onSearchInputChange,
+        setSortByValue,
+    } = useBookmarkList()
+
+    const { 
+        handleCardClick,
+        isModalLoading,
         isAddModalOpen,
         onAddModalOpen,
         onAddModalClose,
-        onSearchInputChange
-    } = useBookmarkList()
-    const { handleCardClick } = useRestaurant()
+        handleAddRestaurant,
+    } = useRestaurant()
 
     const [searchTerm, setSearchTerm] = useState('')
     useEffect(() => {
@@ -82,14 +83,6 @@ export const Home = () => {
             </Flex>
         )
     }, [handleCardClick])
-
-    if (isGlobalLoading) {
-        return (
-            <Box  minH="100vh" display="flex" justifyContent="center" alignItems="center">
-                <Spinner position="relative" top="-100px" size="xl" /> 
-            </Box>
-        )
-    }
   
     return (
         <Box w="100vw">
@@ -179,8 +172,7 @@ export const Home = () => {
                 
             </VStack>
             <CreateBookmark 
-                newRestaurant={newRestaurant}
-                setNewRestaurant={setNewRestaurant}
+                isLoading={isModalLoading}
                 isAddModalOpen={isAddModalOpen}
                 onAddModalClose={onAddModalClose}
                 handleAddRestaurant={handleAddRestaurant}

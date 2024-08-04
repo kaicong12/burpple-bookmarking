@@ -61,7 +61,7 @@ export const uploadRestaurant = async (newRestaurants) => {
         }
 
         const docRef = await addDoc(colRef, completeRestaurantData);
-        if (folderIds) {
+        if (folderIds && folderIds?.length) {
             const updatePromises = folderIds.map(folderId => updateFolderWithRestaurantId(folderId, docRef.id));
             await Promise.all(updatePromises);
         }

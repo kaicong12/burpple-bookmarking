@@ -57,16 +57,17 @@ export const Sidebar = () => {
     };
 
     const {
+        isModalLoading,
         isRestaurantCardOpen, 
         onCloseRestaurantCard, 
-        selectedRestaurant
+        selectedRestaurant,
+        handleUpdateRestaurant,
+        handleDeleteRestaurant,
     } = useRestaurant()
 
     const {
         regionLists,
         folderList,
-        handleUpdateRestaurant,
-        handleDeleteRestaurant,
     } = useBookmarkList()
 
     return (
@@ -149,6 +150,7 @@ export const Sidebar = () => {
 
             {selectedRestaurant && (
                 <RestaurantModal 
+                    isLoading={isModalLoading}
                     handleDeleteRestaurant={handleDeleteRestaurant}
                     handleUpdateRestaurant={handleUpdateRestaurant}
                     restaurant={selectedRestaurant} 
