@@ -78,7 +78,7 @@ export const FolderPage = () => {
                         </Menu>
                     </Flex>
                     { folder.restaurants?.length ? (
-                        <Flex gap={4} mt="20px">
+                        <Flex gap={4} mt="20px" overflowX="auto">
                             {folder.restaurants.map((restaurant) => (
                                 <RestaurantCard key={restaurant.id} onOpen={() => handleCardClick(restaurant)} restaurant={restaurant} />
                             ))}

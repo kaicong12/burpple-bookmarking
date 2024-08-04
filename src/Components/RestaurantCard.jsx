@@ -5,13 +5,13 @@ export const RestaurantCard = ({ restaurant, onOpen }) => {
 
     return (
         <Box 
-            maxW="sm" 
             borderWidth="1px" 
             borderRadius="lg" 
             overflow="hidden"
             boxShadow="md"
             onClick={onOpen} 
             width="273px"
+            flexShrink={0}
         >
             <Image 
                 src={thumbnail} 

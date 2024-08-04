@@ -74,7 +74,7 @@ export const Home = () => {
         }
 
         return (
-            <Flex gap="20px" mt="20px">
+            <Flex gap="20px" mt="20px" flexWrap="wrap">
                 {restaurants.map(restaurant => (
                     <Box key={restaurant.id}>
                         <RestaurantCard onOpen={() => handleCardClick(restaurant)} restaurant={restaurant} />

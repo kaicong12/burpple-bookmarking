@@ -261,7 +261,7 @@ export const CreateBookmark = ({ isLoading, isAddModalOpen, onAddModalClose, han
                     </FormControl>
                 </ModalBody>
                 <ModalFooter>
-                    <Button isLoading={isLoading} colorScheme="blue" mr={3} onClick={() => handleSave(newRestaurant)}>
+                    <Button isLoading={isLoading} bg="#ea246e" color="white" mr={3} onClick={() => handleSave(newRestaurant)}>
                         Save
                     </Button>
                     <Button isLoading={isLoading} onClick={handleOnClose}>Cancel</Button>
