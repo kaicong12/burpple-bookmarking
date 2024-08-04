@@ -167,8 +167,10 @@ export const RestaurantModal = ({ isLoading, handleDeleteRestaurant, handleUpdat
     const handleCloseModal = useCallback(() => {
         if (editMode) {
             handleCancelEdit()
+        } else {
+            onClose()
         }
-    }, [editMode, handleCancelEdit])
+    }, [editMode, handleCancelEdit, onClose])
 
     const handleDiscardChanges = () => {
         setDiscardModalOpen(false);

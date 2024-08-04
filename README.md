@@ -13,6 +13,7 @@ Welcome to the Restaurant Bookmarking App! This application allows users to easi
 ### Restaurant Bookmarking
 - **Add Bookmark**: Users should be able to bookmark a restaurant by entering details such as name, address, and cuisine.
 - **Edit Bookmark**: Users should be able to edit the details of a bookmarked restaurant.
+- **Cancel Edit Confirmation**: Users should be notified if they want to discard his edit changes
 - **Delete Bookmark**: Users should be able to remove a restaurant from their bookmarks. Delete a bookmarked restaurant should remove it from the folders where this restaurant is in.
 - **View Bookmarks**: Users should be able to view a list of all their bookmarked restaurants.
 
@@ -20,6 +21,7 @@ Welcome to the Restaurant Bookmarking App! This application allows users to easi
 - **Create Folder**: Users should be able to create a new folder and name it
 - **Add Restaurants To Folder**: Users should be able to organize their bookmarks into folders, one restaurant can be in multiple folders and one folder can contain multiple restaurants
 - **Edit Folder**: Users should be able to rename folders. 
+- **Cancel Edit Confirmation**: Users should be notified if they want to discard his edit changes
 - **Deleting Folder**: Users should be able to delete folders. Deleting a folder should not delete the bookmarks within it.
 
 ### Error Handling
