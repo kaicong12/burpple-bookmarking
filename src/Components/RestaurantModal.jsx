@@ -30,7 +30,7 @@ import {
     faGlobeAmericas
 } from '@fortawesome/free-solid-svg-icons';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { LocationSearchBox } from './LocationSearchBox';
 import Select from 'react-select';
 
@@ -148,8 +148,14 @@ export const RestaurantModal = ({ isLoading, handleDeleteRestaurant, handleUpdat
         label: region,
     }));
 
+    const handleCloseModal = useCallback(() => {
+        setEditedRestaurant(restaurant)
+        setEditMode(false)
+        onClose()
+    }, [onClose, restaurant])
+
     return (
-        <Modal isOpen={isOpen} onClose={onClose} size="4xl" bg="#F2F2F2">
+        <Modal isOpen={isOpen} onClose={handleCloseModal} size="4xl" bg="#F2F2F2">
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>
