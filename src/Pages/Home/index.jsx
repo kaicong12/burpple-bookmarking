@@ -97,7 +97,7 @@ export const Home = () => {
                             boxShadow="0 2px 3px 0 rgba(0, 0, 0, 0.15);"
                             borderRadius="5px"
                             bg="white"
-                            placeholder="E.g. western at Telok Ayer"
+                            placeholder="E.g. Vegan Restaurant at Haji Lane"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />

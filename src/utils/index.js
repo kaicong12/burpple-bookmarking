@@ -4,7 +4,6 @@ export const fuzzySearch = (events, query) => {
     const options = {
         keys: ['title', 'description', 'region', 'location'],
         includeScore: true,
-        threshold: 0.4,
     };
 
     const fuse = new Fuse(events, options);
