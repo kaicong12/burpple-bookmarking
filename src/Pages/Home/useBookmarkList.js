@@ -44,8 +44,9 @@ export const useBookmarkList = () => {
         return [
             'Central, Singapore',
             'North, Singapore',
-            'Ang Mo Kio',
-            'Bishan'
+            'North East, Singapore',
+            'East, Singapore',
+            'West, Singapore',
         ]
     }, [])
 
