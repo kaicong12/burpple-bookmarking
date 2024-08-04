@@ -16,7 +16,7 @@ import {
 import { useState, useCallback } from 'react';
 
 
-export const CreateFolderModal = ({ newFolder, setNewFolder, isAddModalOpen, onAddModalClose, handleAddFolder }) => {
+export const CreateFolderModal = ({ newFolder, setNewFolder, isAddModalOpen, onAddModalClose, handleAddFolder, handleEditFolder, isEdit }) => {
     const [errors, setErrors] = useState({});
 
     const handleInputChange = (e) => {
@@ -50,14 +50,20 @@ export const CreateFolderModal = ({ newFolder, setNewFolder, isAddModalOpen, onA
             setErrors(newErrors);
             return;
         }
-        handleAddFolder(newFolder);
-    }, [handleAddFolder]);
+
+        if (isEdit) {
+            handleEditFolder(newFolder);
+        } else {
+            handleAddFolder(newFolder);
+        }
+
+    }, [handleAddFolder, handleEditFolder, isEdit]);
 
     return (
         <Modal isOpen={isAddModalOpen} onClose={handleOnClose} size="md">
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader>Create New Folder</ModalHeader>
+                <ModalHeader>{isEdit ? 'Edit Folder' : 'Create New Folder'}</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
                     <FormControl isInvalid={errors.name} isRequired>
@@ -72,7 +78,7 @@ export const CreateFolderModal = ({ newFolder, setNewFolder, isAddModalOpen, onA
                 </ModalBody>
                 <ModalFooter>
                     <Button bg="#ea246e" color="white" mr={3} onClick={() => handleSave(newFolder)}>
-                        Save
+                        {isEdit ? 'Save Changes' : 'Save'}
                     </Button>
                     <Button variant="outline" onClick={handleOnClose}>Cancel</Button>
                 </ModalFooter>

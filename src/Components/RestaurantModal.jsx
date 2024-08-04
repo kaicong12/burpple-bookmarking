@@ -98,6 +98,10 @@ export const RestaurantModal = ({ handleDeleteRestaurant, handleUpdateRestaurant
 
     const handleLocationChange = (location) => {
         const locationText = location?.text?.text ?? ''
+        if (locationText && errors.location) {
+            errors.location = ""
+        }
+
         setEditedRestaurant(prev => ({
             ...prev,
             location: locationText,

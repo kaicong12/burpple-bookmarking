@@ -164,25 +164,36 @@ export const addFolder = async (newFolder) => {
     return docRef.id;
 };
 
-export const updateFolder = async (folderId, updatedFolder) => {
+export const updateFolder = async (updatedFolder) => {
+    const { id: folderId, name, description } = updatedFolder
     const folderDocRef = doc(db, "folderList", folderId);
-    await updateDoc(folderDocRef, updatedFolder);
+    
+    try {
+        await updateDoc(folderDocRef, { name, description });
+    } catch (e) {
+        console.error("Error updating folder: ", e);
+        throw new Error("Failed to update folder: " + e.message);
+    }
 };
 
-export const deleteFolder = async (folderId) => {
-    // Remove folder reference from restaurants
-    const restaurantsColRef = collection(db, "bookmarkedRestaurants");
-    const restaurantSnapshot = await getDocs(restaurantsColRef);
+export const deleteFolder = async (folder) => {
+    const { id: folderId, restaurants } = folder;
 
-    restaurantSnapshot.docs.forEach(async (restaurantDoc) => {
-        const restaurantData = restaurantDoc.data();
-        if (restaurantData.folderIds && restaurantData.folderIds.includes(folderId)) {
-            const updatedFolderIds = restaurantData.folderIds.filter(id => id !== folderId);
-            await updateDoc(restaurantDoc.ref, { folderIds: updatedFolderIds });
-        }
-    });
+    try {
+        // Remove folder reference from associated restaurants
+        const updatePromises = restaurants.map(async (restaurant) => {
+            const restaurantDocRef = doc(db, "bookmarkedRestaurants", restaurant.id);
+            const updatedFolderIds = restaurant.folders.filter(id => id !== folderId);
+            await updateDoc(restaurantDocRef, { folders: updatedFolderIds });
+        });
 
-    // Delete the folder
-    const folderDocRef = doc(db, "folderList", folderId);
-    await deleteDoc(folderDocRef);
+        await Promise.all(updatePromises);
+
+        // Delete the folder
+        const folderDocRef = doc(db, "folderList", folderId);
+        await deleteDoc(folderDocRef);
+    } catch (e) {
+        console.error("Error deleting folder: ", e);
+        throw new Error("Failed to delete folder: " + e.message);
+    }
 };

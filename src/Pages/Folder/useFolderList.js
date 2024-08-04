@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { useDisclosure } from '@chakra-ui/react';
 import { 
     useRecoilValueLoadable,
@@ -6,19 +6,23 @@ import {
 } from "recoil";
 import { folderListState } from "./state";
 import { restaurantListState } from "../Home/state";
-import { addFolder } from "../../db"
+import { addFolder, updateFolder, deleteFolder } from "../../db"
 
 export const useFolderList = () => {
-    const defaultFolderData = {
+    const defaultFolderData = useMemo(() => ({
         name: '',
         description: '',
-    }
+    }), [])
 
     const [folders, setFolders] = useState([]);
+    const [folderToBeDeleted, setFolderToBeDeleted] = useState(null)
     const [newFolder, setNewFolder] = useState(defaultFolderData)
     const [isLoadingFolders, setIsLoadingFolders] = useState(true)
+    const [isDeleting, setIsDeleting] = useState(false)
     const { isOpen: isAddModalOpen, onOpen: onAddModalOpen, onClose: onAddModalClose } = useDisclosure();
-
+    const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onClose: onEditModalClose } = useDisclosure();
+    const { isOpen: isDeleteModalOpen, onOpen: onDeleteModalOpen, onClose: onDeleteModalClose } = useDisclosure();
+    
     const onSyncRestaurants = useRecoilRefresher_UNSTABLE(restaurantListState);
     const onSyncFolders = useRecoilRefresher_UNSTABLE(folderListState)
 
@@ -27,23 +31,58 @@ export const useFolderList = () => {
         onSyncFolders()
     }, [onSyncRestaurants, onSyncFolders])
 
-    const handleAddFolder = async (newFolder) => {
-        // setIsGlobalLoading(true)
-        setIsLoadingFolders(true);
+    const onClickEditFolder = useCallback((folder) => {
+        setNewFolder(folder);
+        onEditModalOpen();
+    }, [onEditModalOpen])
 
+    const onClickDeleteFolder = useCallback((folder) => {
+        setFolderToBeDeleted(folder)
+        onDeleteModalOpen()
+    }, [onDeleteModalOpen])
+
+    const handleAddFolder = async (newFolder) => {
         try {
             await addFolder(newFolder)
-            onSync()
         } catch (err) {
             console.log(err)
         } finally {
             setNewFolder(defaultFolderData)
-            setIsLoadingFolders(false)
-            // setIsGlobalLoading(false)
+            onSync()
         }
         
         onAddModalClose();
     }
+
+    const handleEditFolder = useCallback(async (folder) => {
+        try {
+            await updateFolder(folder)
+        } catch (err) {
+            console.log(err)
+        } finally {
+            setNewFolder(defaultFolderData)
+            onSync()
+        }
+        
+        onAddModalClose();
+        onEditModalClose()
+    }, [defaultFolderData, onAddModalClose, onEditModalClose, onSync])
+
+    const handleDeleteFolder = useCallback(async (folder) => {
+        setIsDeleting(true)
+
+        try {
+            await deleteFolder(folder)
+            setIsDeleting(false)
+        } catch (err) {
+            console.log(err)
+        } finally {
+            onDeleteModalClose()
+        }
+        
+        onSync()
+
+    }, [onDeleteModalClose, onSync])
 
     const folderListLoadable = useRecoilValueLoadable(folderListState);
     useEffect(() => {
@@ -66,6 +105,16 @@ export const useFolderList = () => {
         onAddModalClose,
         newFolder, 
         setNewFolder,
-        handleAddFolder
+        handleAddFolder,
+        onClickEditFolder,
+        handleEditFolder,
+        onClickDeleteFolder,
+        handleDeleteFolder,
+        isEditModalOpen,
+        onEditModalClose,
+        isDeleteModalOpen,
+        onDeleteModalClose,
+        folderToBeDeleted,
+        isDeleting
     }
 }

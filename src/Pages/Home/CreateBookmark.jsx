@@ -42,6 +42,10 @@ export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen
 
     const handleLocationChange = (location) => {
         const locationText = location?.text?.text ?? ''
+        if (locationText && errors.location) {
+            errors.location = ""
+        }
+
         setNewRestaurant(prev => ({
             ...prev,
             location: locationText,
@@ -89,6 +93,11 @@ export const CreateBookmark = ({ newRestaurant, setNewRestaurant, isAddModalOpen
             setPreviewImage(acceptedFiles.map(file => Object.assign(file, {
                 preview: URL.createObjectURL(file)
             })));
+            
+            if (acceptedFiles && errors.thumbnail) {
+                errors.thumbnail = ""
+            }
+            
             setNewRestaurant(prev => ({
                 ...prev,
                 thumbnail: acceptedFiles[0]

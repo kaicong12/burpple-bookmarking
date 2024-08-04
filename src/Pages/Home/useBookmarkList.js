@@ -40,8 +40,8 @@ export const useBookmarkList = () => {
     const [sortByValue, setSortByValue] = useRecoilState(sortByState);
     const [regionFilters, setRegionFilters] = useRecoilState(regionFilterState)
 
-  const onSyncRestaurants = useRecoilRefresher_UNSTABLE(restaurantListState);
-  const onSyncFolders = useRecoilRefresher_UNSTABLE(folderListState)
+    const onSyncRestaurants = useRecoilRefresher_UNSTABLE(restaurantListState);
+    const onSyncFolders = useRecoilRefresher_UNSTABLE(folderListState)
 
     const onRegionFilterChange = useCallback((values) => {
         setRegionFilters(values)
@@ -56,7 +56,7 @@ export const useBookmarkList = () => {
             'Created At (Latest To Oldest)',
             'Created At (Oldest To Latest)',
             'Title (A to Z)',
-            'Title (Z to Z)',
+            'Title (Z to A)',
         ]
     }, [])
 
